@@ -118,5 +118,43 @@ def delete_dir():
 	print("Dir deleted")
 	return 0
 
-make_dir()
-delete_dir()
+print("Please choose the action:")
+print("1 - initiate the file")
+print("2 - create file")
+print("3 - read file")
+print("4 - write file")
+print("5 - delete file")
+print("6 - info about file")
+print("7 - copy file")
+print("8 - move file")
+print("9 - open directory")
+print("10 - list all files in directory")
+print("11 - create directory")
+print("12 - delete directory")
+
+menu = int(input())
+
+if menu == 1:
+	init()
+elif menu == 2:
+	create_file()
+elif menu == 3:
+	read_file()
+elif menu == 4:
+	write_file()
+elif menu == 5:
+	delete_file()
+elif menu == 6:
+	info_file()
+elif menu == 7:
+	copy_file()
+elif menu == 8:
+	move_file()
+elif menu == 9:
+	open_dir()
+elif menu == 10:
+	read_dir()
+elif menu == 11:
+	make_dir()
+elif menu == 12:
+	delete_dir()
