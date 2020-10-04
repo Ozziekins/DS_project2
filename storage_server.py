@@ -71,16 +71,6 @@ class StorageService(rpyc.Service):
 		else:
 			print("File does not exist")
 
-# rootdir = '/tmp'
-# for root, dirs, files in os.walk(rootdir):
-#     for fname in files:
-#         if fname == 'somefile.txt':
-#             with open(os.path.join(root, fname)) as f:
-#                 print('Filename: %s' % fname)
-#                 print('directory: %s' % root)
-#                 print(f.read())
-
-
 	def exposed_copy_file(self, src_id, dest_id):
 		if os.path.exists(DATA_DIR + str(src_id)):
 			shutil.copy(DATA_DIR + str(src_id), DATA_DIR + str(dest_id))
@@ -128,7 +118,7 @@ class StorageService(rpyc.Service):
 
 		host, port = storage_server
 
-		conn = rpyc.connect(host, port=port, config = {"allow_public_attrs" : True})
+		conn = rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
 		storage_server = conn.root
 		storage_server.write_file(block_id, data, storage_servers)
 
@@ -138,7 +128,7 @@ class StorageService(rpyc.Service):
 
 		host, port = storage_server
 
-		conn = rpyc.connect(host, port=port, config = {"allow_public_attrs" : True})
+		conn = rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
 		storage_server = conn.root
 		storage_server.delete_file(block_id, data, storage_servers)
 
@@ -155,5 +145,5 @@ if __name__ == "__main__":
 
     if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
 
-    t = ThreadedServer(StorageService, port = PORT,)
+    t = ThreadedServer(StorageService, port=PORT, protocol_config={"allow_public_attrs" : True})
     t.start()
