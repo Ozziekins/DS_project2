@@ -8,6 +8,7 @@ import socket
 import glob
 import pickle
 import shutil
+import argparse
 
 from rpyc.utils.server import ThreadedServer
 
@@ -21,15 +22,17 @@ $~ python3 client.py read project.txt
 '''
 
 class StorageService(rpyc.Service):
+
 	def exposed_initialize_storage(self):
 		shutil.rmtree(DATA_DIR) 
 
-	def exposed_is_file(self, block_id):
-		return os.path.isfile(DATA_DIR + str(block_id))
+	def exposed_is_file(self, file_name):
+		return os.path.isfile(DATA_DIR + file_name)
 
-	def exposed_create_file(self, block_id):
-		if os.path.exists(DATA_DIR + str(block_id)) == False:
-    		open(DATA_DIR + str(block_id), "w").close
+	# done on naming server
+	def exposed_create_file(self, file_name):
+		if os.path.exists(DATA_DIR + file_name) == False:
+    		open(DATA_DIR + file_name, "w").close
 
     	# try:
 	    #     with open(DATA_DIR + str(block_id), "x") as fd:
@@ -50,18 +53,20 @@ class StorageService(rpyc.Service):
 		with open(os.path.join(DATA_DIR, str(block_id)), 'w') as f:
 			return f.write(data)
 		if len(storage_servers) > 0:
-			self.replicate(block_id, data, storage_servers)
+			self.replicate_write(block_id, data, storage_servers)
 
-	def exposed_delete_file(self, block_id):
+	def exposed_delete_file(self, block_id, data, storage_servers):
 		if os.path.exists(DATA_DIR + str(block_id)):
 	        os.remove(DATA_DIR + str(block_id))
 	        return True
 	    else:
 	        return False
+	    if len(storage_servers) > 0:
+			self.replicate_delete(block_id, data, storage_servers)
 
-	def exposed_file_info(self, block_id):
-		if os.path.exists(DATA_DIR + str(block_id)):
-			st = os.stat(DATA_DIR + str(block_id))
+	def exposed_file_info(self, file_name):
+		if os.path.exists(DATA_DIR + file_name):
+			st = os.stat(DATA_DIR + file_name)
 			return st
 		else:
 			print("File does not exist")
@@ -90,41 +95,52 @@ class StorageService(rpyc.Service):
 	    else:
 	        return False
 
-	def exposed_open_dir(self, block_id):
-		os.chdir(DATA_DIR + str(block_id))
+	def exposed_open_dir(self, path):
+		os.chdir(DATA_DIR + path)
 
-	def exposed_read_dir(self, block_id):
-		for root, dirs, files in os.walk(DATA_DIR + str(block_id), topdown = True):
+	def exposed_read_dir(self, path):
+		for root, dirs, files in os.walk(DATA_DIR + path, topdown = True):
 		   for name in files:
 		      print(os.path.join(root, name))
 		   for name in dirs:
 		      print(os.path.join(root, name))
 
-	def exposed_make_dir(self, block_id):
+	# done on naming server
+	def exposed_make_dir(self, path):
 		try:
-		    os.mkdir(DATA_DIR + str(block_id))
+		    os.mkdir(DATA_DIR + path)
 		except OSError:
-		    print ("Creation of the directory %s failed" % DATA_DIR + str(block_id))
+		    print ("Creation of the directory %s failed" % DATA_DIR + path)
 		else:
-		    print ("Successfully created the directory %s " % DATA_DIR + str(block_id))
+		    print ("Successfully created the directory %s " % DATA_DIR + path)
 
-	def exposed_delete_dir(self, block_id):
+	def exposed_delete_dir(self, path):
 		try:
-		    os.rmdir(DATA_DIR + str(block_id))
+		    os.rmdir(DATA_DIR + path)
 		except OSError:
-		    print ("Deletion of the directory %s failed" % DATA_DIR + str(block_id))
+		    print ("Deletion of the directory %s failed" % DATA_DIR + path)
 		else:
-		    print ("Successfully deleted the directory %s " % DATA_DIR + str(block_id))
+		    print ("Successfully deleted the directory %s " % DATA_DIR + path)
 
-	def replicate(self, block_id, data, storage_servers):
+	def replicate_write(self, block_id, data, storage_servers):
 		storage_server = storage_servers[0]
 		storage_servers = storage_servers[1:]
 
 		host, port = storage_server
 
-		conn = rpyc.connect(host, port=port)
+		conn = rpyc.connect(host, port=port, config = {"allow_public_attrs" : True})
 		storage_server = conn.root
 		storage_server.write_file(block_id, data, storage_servers)
+
+	def replicate_delete(block_id, data, storage_servers):
+		storage_server = storage_servers[0]
+		storage_servers = storage_servers[1:]
+
+		host, port = storage_server
+
+		conn = rpyc.connect(host, port=port, config = {"allow_public_attrs" : True})
+		storage_server = conn.root
+		storage_server.delete_file(block_id, data, storage_servers)
 
 
 '''
@@ -132,6 +148,12 @@ subnet of storage servers and possibly naming server: 10.0.15.0/24
 '''
 
 if __name__ == "__main__":
-	if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
-	t = ThreadedServer(StorageService, port = 8888)
-	t.start()
+	arg = argparse.ArgumentParser()
+    arg.add_argument("-p", "--port", required=True, help="port number needed")
+    args = vars(arg.parse_args())
+    PORT = int(args['port'])
+
+    if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
+
+    t = ThreadedServer(StorageService, port = PORT,)
+    t.start()
