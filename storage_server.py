@@ -8,7 +8,12 @@ import socket
 import glob
 import pickle
 import shutil
+import logging
 import argparse
+
+logging.basicConfig(level=logging.DEBUG)
+LOG = logging.getLogger(__name__)
+
 
 from rpyc.utils.server import ThreadedServer
 
@@ -54,19 +59,18 @@ class StorageService(rpyc.Service):
 	def exposed_write_file(self, block_id, data, storage_servers):
 		# if not os.path.isfile(DATA_DIR + str(block_id)):
 		# 	return self.create_file(str(block_id))
+
 		with open(os.path.join(DATA_DIR, str(block_id)), 'w') as f:
-			return f.write(data)
+			f.write(data)
+
 		if len(storage_servers) > 0:
 			self.replicate_write(block_id, data, storage_servers)
 
-	def exposed_delete_file(self, block_id, data, storage_servers):
+	def exposed_delete_file(self, block_id, storage_servers):
 		if os.path.exists(DATA_DIR + str(block_id)):
 			os.remove(DATA_DIR + str(block_id))
-			return True
-		else:
-			return False
 		if len(storage_servers) > 0:
-			self.replicate_delete(block_id, data, storage_servers)
+			self.replicate_delete(block_id, storage_servers)
 
 	def exposed_file_info(self, file_name):
 		if os.path.exists(DATA_DIR + file_name):
@@ -90,14 +94,16 @@ class StorageService(rpyc.Service):
 			return False
 
 	def exposed_open_dir(self, path):
-		os.chdir(DATA_DIR + path)
+		os.chdir(DATA_DIR+path)
 
 	def exposed_read_dir(self, path):
+		ls = list()
 		for root, dirs, files in os.walk(DATA_DIR + path, topdown=True):
-		   for name in files:
-		      print(os.path.join(root, name))
-		   for name in dirs:
-		      print(os.path.join(root, name))
+			for name in files:
+				ls.append(os.path.join(root, name))
+			for name in dirs:
+				ls.append(os.path.join(root, name))
+		return ls
 
 	# done on naming server
 	def exposed_make_dir(self, path):
@@ -117,6 +123,8 @@ class StorageService(rpyc.Service):
 		    print ("Successfully deleted the directory %s " % DATA_DIR + path)
 
 	def replicate_write(self, block_id, data, storage_servers):
+		print("2 here")
+		print(storage_servers)
 		storage_server = storage_servers[0]
 		storage_servers = storage_servers[1:]
 
@@ -126,15 +134,17 @@ class StorageService(rpyc.Service):
 		storage_server = conn.root
 		storage_server.write_file(block_id, data, storage_servers)
 
-	def replicate_delete(block_id, data, storage_servers):
+	def replicate_delete(self, block_id, storage_servers):
+		print("from storage")
 		storage_server = storage_servers[0]
+		print(storage_server)
 		storage_servers = storage_servers[1:]
 
 		host, port = storage_server
 
 		conn = rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
 		storage_server = conn.root
-		storage_server.delete_file(block_id, data, storage_servers)
+		storage_server.delete_file(block_id, storage_servers)
 
 
 '''
@@ -152,4 +162,4 @@ if __name__ == "__main__":
 	if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
 
 	t = ThreadedServer(StorageService, port=PORT, protocol_config={"allow_public_attrs" : True})
-	t.start() 
+	t.start()

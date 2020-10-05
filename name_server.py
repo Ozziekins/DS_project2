@@ -3,45 +3,53 @@ import uuid
 import threading 
 import math
 import random
-import signal
-import pickle
 import sys
 import os
 import pprint
+from Directory import Directory
+from datetime import date
+
 
 from rpyc.utils.server import ThreadedServer
 
 BLOCK_SIZE = 128
 REPLICATION_FACTOR = 2
-MINIONS = {"1":("127.0.0.1", 5555), "2":("127.0.0.1",6666)}
+STORAGESERVER = {"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000)}
 
-class NamingService(rpyc.Service):
-    file_table = {}
-    block_mapping = {}
-    storage_servers = MINIONS
-
+class MasterService(rpyc.Service):
+    file_tree = Directory('','')
+    storage_servers = STORAGESERVER
     block_size = BLOCK_SIZE
     replication_factor = REPLICATION_FACTOR
 
     def exposed_read(self,fname):
-      mapping = self.__class__.file_table[fname]
-      return mapping
+        file = self.__class__.file_tree.get_file(fname)
+        return file.get_mapping()
+
+    def exposed_create_file(self, fname):
+        self.__class__.file_tree.create_file(fname)
+
+    def exposed_get_info(self, fname):
+        file = self.__class__.file_tree.get_file(fname)
+        return file.get_info()
+
+
+    def exposed_make_dir(self,dir_name):
+        self.__class__.file_tree.create_directory(dir_name)
+    
+    def exposed_open_dir(self, path):
+        current_dir = self.__class__.file_tree.open_directory(path)
+        return current_dir
 
     def exposed_write(self,dest,size):
-      if self.exists(dest):
-        pass # ignoring for now, will delete it later
+        # if self.exists(dest):
+        #     print(f'File {dest} already exist')
+        #     return
+        self.__class__.file_tree.create_file(dest)
+        num_blocks = self.calc_num_blocks(size)
+        blocks = self.alloc_blocks(dest,num_blocks)
 
-      self.__class__.file_table[dest]=[]
-
-      num_blocks = self.calc_num_blocks(size)
-      blocks = self.alloc_blocks(dest,num_blocks)
-      return blocks
-
-    def exposed_get_file_table_entry(self,fname):
-      if fname in self.__class__.file_table:
-        return self.__class__.file_table[fname]
-      else:
-        return None
+        return blocks
 
     def exposed_get_block_size(self):
       return self.__class__.block_size
@@ -53,20 +61,26 @@ class NamingService(rpyc.Service):
       return int(math.ceil(float(size)/self.__class__.block_size))
 
     def exists(self,file):
-      return file in self.__class__.file_table
+        if file in self.__class__.file_tree.get_files().keys():
+            return True
+        return False
 
-    def alloc_blocks(self,dest,num):
+    def alloc_blocks(self,dest,numblks):
         blocks = []
-        for _ in range(0,num):
-            block_uuid = uuid.uuid1()
+        size = numblks * self.__class__.block_size
+        file = self.__class__.file_tree.get_file(dest)
+        file.set_size(size)
+        file.set_last_modified(date.today())
+        for _ in range(0,numblks):
+            block_id = uuid.uuid1()
             nodes_ids = random.sample(self.__class__.storage_servers.keys(),self.__class__.replication_factor)
-            blocks.append((block_uuid,nodes_ids))
+            blocks.append((block_id,nodes_ids))
 
-            self.__class__.file_table[dest].append((block_uuid,nodes_ids))
-        pprint.pprint(self.__class__.file_table)
+            file.add_mapping((block_id,nodes_ids))
+        print(blocks)
         return blocks
 
 
 if __name__ == "__main__":
-  t = ThreadedServer(NamingService, port = 2000, protocol_config = {"allow_public_attrs" : True})
-  t.start() 
+  t = ThreadedServer(MasterService, port = 2000, protocol_config = {"allow_public_attrs" : True})
+  t.start()
