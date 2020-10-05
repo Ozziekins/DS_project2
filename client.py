@@ -3,6 +3,7 @@ import sys
 import os
 import logging
 import argparse
+from six.moves import input
 
 logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger(__name__)
@@ -133,52 +134,58 @@ def delete_dir(naming_server, path):
         delete_dir_on_storage_server(m, path)
 
 def main(args):
-    con=rpyc.connect("127.0.0.1",port=2000, config = {"allow_public_attrs" : True})
+    con=rpyc.connect("127.0.0.1", port=2000, config = {"allow_public_attrs" : True})
     naming_server=con.root
 
-    menu = sys.argv[1]
+    while True:
+        print()
+        print("Enter command: ")
+        cmd = input("$: ") 
+        words = cmd.split()
+        menu = words[0]
 
-    if menu == 'init':
-        initialize(naming_server)
-    elif menu == 'create':
-        create_file(naming_server, sys.argv[2])
-    elif menu == 'read':
-        read_file(naming_server, sys.argv[2])
-    elif menu == 'write':
-        write_file(naming_server, sys.argv[2], sys.argv[3])
-    elif menu == 'delete':
-        delete_file(naming_server, sys.argv[2])
-    elif menu == 'info':
-        info_file(naming_server, sys.argv[2])
-    elif menu == 'copy':
-        copy_file(naming_server, sys.argv[2], sys.argv[3])
-    elif menu == 'move':
-        move_file(naming_server, sys.argv[2], sys.argv[3])
-    elif menu == 'opndir':
-        open_dir(naming_server, sys.argv[2])
-    elif menu == 'rddir':
-        read_dir(naming_server, sys.argv[2])
-    elif menu == 'mkdir':
-        make_dir(naming_server, sys.argv[2])
-    elif menu == 'dltdir':
-        delete_dir(naming_server, sys.argv[2])
-    else:
-        print("Possible commands")
-        print("-------------------------")
-        print("init")
-        print("create <file_name>")
-        print("read <file_name>")
-        print("write <src_file> <dest_file>")
-        print("delete <file_name>")
-        print("info <file_name>")
-        print("copy src_file dest_file")
-        print("move src dest")
-        print("opndir directory/")
-        print("rddir directory/")
-        print("mkdir directory/")
-        print("dltdir directory/")
-        LOG.error("incorrect command")
-
+        if menu == 'init':
+            initialize(naming_server)
+        elif menu == 'create':
+            create_file(naming_server, words[1])
+        elif menu == 'read':
+            read_file(naming_server, words[1])
+        elif menu == 'write':
+            write_file(naming_server, words[1], words[2])
+        elif menu == 'delete':
+            delete_file(naming_server, words[1])
+        elif menu == 'info':
+            info_file(naming_server, words[1])
+        elif menu == 'copy':
+            copy_file(naming_server, words[1], words[2])
+        elif menu == 'move':
+            move_file(naming_server, words[1], words[2])
+        elif menu == 'opndir':
+            open_dir(naming_server, words[1])
+        elif menu == 'rddir':
+            read_dir(naming_server, words[1])
+        elif menu == 'mkdir':
+            make_dir(naming_server, words[1])
+        elif menu == 'dltdir':
+            delete_dir(naming_server, words[1])
+        elif menu == 'exit':
+            break
+        else:
+            print("Possible commands")
+            print("-------------------------")
+            print("init")
+            print("create <file_name>")
+            print("read <file_name>")
+            print("write <src_file> <dest_file>")
+            print("delete <file_name>")
+            print("info <file_name>")
+            print("copy src_file dest_file")
+            print("move src dest")
+            print("opndir directory/")
+            print("rddir directory/")
+            print("mkdir directory/")
+            print("dltdir directory/")
+            LOG.error("incorrect command")
 
 if __name__ == "__main__":
     main(sys.argv[1:])
