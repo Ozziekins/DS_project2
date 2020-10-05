@@ -15,11 +15,11 @@ def send_to_storage(block_uuid,data,storage_servers):
 
 
 def read_from_storage(block_uuid,storage):
-  host,port = storage
-  con=con.root(host,port=port, config = {"allow_public_attrs" : True})
-  #TODO chech the name
-  storage = con.root
-  return storage.read_file(block_uuid)
+	host,port = storage
+	con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+	#TODO chech the name
+	storage = con.root
+	return storage.read_file(block_uuid)
 
 
 def initialize(naming_server):
@@ -94,8 +94,11 @@ def move_file(name_server, src, dest):
 	return 0
 
 def open_dir(name_server, path):
-	
-	return 0
+	file_table = name_server.get_file_table_entry(path)
+	files = file_table.keys()
+	sys.stdout.write(files)
+	return 
+
 
 def read_dir(path):
 
