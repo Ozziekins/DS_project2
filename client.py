@@ -94,14 +94,14 @@ def move_file(name_server, src, dest):
 	return 0
 
 def open_dir(name_server, path):
-	file_table = name_server.get_file_table_entry(path)
-	files = file_table.keys()
-	sys.stdout.write(files)
+
 	return 
 
 
-def read_dir(path):
-
+def read_dir(name_server, path):
+	file_table = name_server.get_file_table_entry(path)
+	files = file_table.keys()
+	sys.stdout.write(files)
 	return 0
 
 def make_dir(name_server, path):
