@@ -2,6 +2,9 @@ import rpyc
 import sys
 import os
 import logging
+logging.basicConfig(level=logging.DEBUG)
+LOG = logging.getLogger(__name__)
+
 
 def send_to_storage(block_uuid,data,storage_servers):
     LOG.info("sending: " + str(block_uuid) + str(storage_servers))

@@ -43,7 +43,7 @@ class MasterService(rpyc.Service):
     def exposed_write(self,dest,size):
         if self.exists(dest):
             print(f'File {dest} already exist')
-            return
+            return None
         self.__class__.file_tree.create_file(dest)
         num_blocks = self.calc_num_blocks(size)
         blocks = self.alloc_blocks(dest,num_blocks)
