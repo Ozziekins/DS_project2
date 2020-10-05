@@ -70,9 +70,6 @@ class StorageService(rpyc.Service):
 	def exposed_delete_file(self, block_id, storage_servers):
 		if os.path.exists(DATA_DIR + str(block_id)):
 			os.remove(DATA_DIR + str(block_id))
-			return True
-		else:
-			return False
 		if len(storage_servers) > 0:
 			self.replicate_delete(block_id, storage_servers)
 
