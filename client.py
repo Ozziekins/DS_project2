@@ -114,7 +114,7 @@ def read_dir(name_server, path):
 	return 0
 
 def make_dir(name_server, path):
-	name_server.create_file(path)
+	name_server.make_dir(path)
 	return 0
 
 def delete_dir(path):
