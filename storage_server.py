@@ -12,7 +12,7 @@ import argparse
 
 from rpyc.utils.server import ThreadedServer
 
-DATA_DIR="/var/storage/"
+# DATA_DIR="/var/storage/"
 
 '''
 Example:
@@ -24,15 +24,19 @@ $~ python3 client.py read project.txt
 class StorageService(rpyc.Service):
 
 	def exposed_initialize_storage(self):
-		shutil.rmtree(DATA_DIR) 
+		for root, dirs, files in os.walk(DATA_DIR):
+		    for f in files:
+		        os.unlink(os.path.join(root, f))
+		    for d in dirs:
+		        shutil.rmtree(os.path.join(root, d))
 
-	def exposed_is_file(self, file_name):
-		return os.path.isfile(DATA_DIR + file_name)
+	# def exposed_is_file(self, file_name):
+	# 	return os.path.isfile(DATA_DIR + file_name)
 
-	# done on naming server
-	def exposed_create_file(self, file_name):
-		if os.path.exists(DATA_DIR + file_name) == False:
-    		open(DATA_DIR + file_name, "w").close
+	# # done on naming server
+	# def exposed_create_file(self, file_name):
+	# 	if os.path.exists(DATA_DIR + file_name) == False:
+	# 		open(DATA_DIR + file_name, "w").close
 
     	# try:
 	    #     with open(DATA_DIR + str(block_id), "x") as fd:
@@ -44,12 +48,13 @@ class StorageService(rpyc.Service):
 	def exposed_read_file(self, block_id):
 		if not os.path.isfile(DATA_DIR + str(block_id)):
 			return None
-		with open(os.path.join(DATA_DIR, str(block_id))) as f:
-			return f.read() 
+		else:
+			with open(os.path.join(DATA_DIR, str(block_id))) as f:
+				return f.read() 
 
 	def exposed_write_file(self, block_id, data, storage_servers):
-		if not os.path.isfile(DATA_DIR + str(block_id)):
-			return self.create_file(block_id)
+		# if not os.path.isfile(DATA_DIR + str(block_id)):
+		# 	return self.create_file(str(block_id))
 		with open(os.path.join(DATA_DIR, str(block_id)), 'w') as f:
 			return f.write(data)
 		if len(storage_servers) > 0:
@@ -57,11 +62,11 @@ class StorageService(rpyc.Service):
 
 	def exposed_delete_file(self, block_id, data, storage_servers):
 		if os.path.exists(DATA_DIR + str(block_id)):
-	        os.remove(DATA_DIR + str(block_id))
-	        return True
-	    else:
-	        return False
-	    if len(storage_servers) > 0:
+			os.remove(DATA_DIR + str(block_id))
+			return True
+		else:
+			return False
+		if len(storage_servers) > 0:
 			self.replicate_delete(block_id, data, storage_servers)
 
 	def exposed_file_info(self, file_name):
@@ -75,21 +80,21 @@ class StorageService(rpyc.Service):
 		if os.path.exists(DATA_DIR + str(src_id)):
 			shutil.copy(DATA_DIR + str(src_id), DATA_DIR + str(dest_id))
 			return True
-	    else:
-	        return False
+		else:
+			return False
 
 	def exposed_move_file(self, old_path, new_path):
 		if os.path.exists(DATA_DIR + str(old_path)):
 			shutil.move(DATA_DIR + str(old_path), DATA_DIR + str(new_path))
 			return True
-	    else:
-	        return False
+		else:
+			return False
 
 	def exposed_open_dir(self, path):
 		os.chdir(DATA_DIR + path)
 
 	def exposed_read_dir(self, path):
-		for root, dirs, files in os.walk(DATA_DIR + path, topdown = True):
+		for root, dirs, files in os.walk(DATA_DIR + path, topdown=True):
 		   for name in files:
 		      print(os.path.join(root, name))
 		   for name in dirs:
@@ -139,11 +144,13 @@ subnet of storage servers and possibly naming server: 10.0.15.0/24
 
 if __name__ == "__main__":
 	arg = argparse.ArgumentParser()
-    arg.add_argument("-p", "--port", required=True, help="port number needed")
-    args = vars(arg.parse_args())
-    PORT = int(args['port'])
+	arg.add_argument("-p", "--port", required=True, help="port number needed")
+	arg.add_argument("-dir", "--directory", required=True, help="operating directory")
+	args = vars(arg.parse_args())
+	PORT = int(args['port'])
+	DATA_DIR = args['directory']
 
-    if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
+	if not os.path.isdir(DATA_DIR): os.mkdir(DATA_DIR)
 
-    t = ThreadedServer(StorageService, port=PORT, protocol_config={"allow_public_attrs" : True})
-    t.start()
+	t = ThreadedServer(StorageService, port=PORT, protocol_config={"allow_public_attrs" : True})
+	t.start()
