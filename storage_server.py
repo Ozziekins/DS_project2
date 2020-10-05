@@ -95,14 +95,16 @@ class StorageService(rpyc.Service):
 			return False
 
 	def exposed_open_dir(self, path):
-		os.chdir(DATA_DIR + path)
+		os.chdir(DATA_DIR+path)
 
 	def exposed_read_dir(self, path):
+		ls = list()
 		for root, dirs, files in os.walk(DATA_DIR + path, topdown=True):
-		   for name in files:
-		      print(os.path.join(root, name))
-		   for name in dirs:
-		      print(os.path.join(root, name))
+			for name in files:
+				ls.append(os.path.join(root, name))
+			for name in dirs:
+				ls.append(os.path.join(root, name))
+		return ls
 
 	# done on naming server
 	def exposed_make_dir(self, path):

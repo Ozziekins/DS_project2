@@ -19,6 +19,9 @@ def initialize(naming_server):
         m = storage_servers['{}'.format(i+1)]
         initialize_storage_server(m)
 
+def create_file(naming_server, file_name):
+    naming_server.create_file(fname)
+
 def read_from_storage_server(block_uuid, storage_server):
     host,port = storage_server
     con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
@@ -76,6 +79,58 @@ def delete_file(naming_server, fname):
     for block in file_table:
         for m in [naming_server.get_storage_servers()[_] for _ in block[1]]:
             delete_from_storage_server(block[0], m)
+
+def info_file(naming_server, fname):
+    naming_server.get_info(fname)
+
+def copy_file():
+    pass
+
+def move_file():
+    pass
+
+def open_dir_on_storage_server(storage, path):
+    host,port = storage
+    con=rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
+    storage = con.root
+    storage.open_dir(path)
+
+def open_dir(naming_server, path):
+    # naming_server.open_dir(path)
+    storage_servers = naming_server.get_storage_servers()
+    for i in range(len(storage_servers)):
+        m = storage_servers['{}'.format(i+1)]
+        open_dir_on_storage_server(m, path)
+
+def read_dir(naming_server, path):
+    # naming_server.list_dir(path)
+    pass
+
+def make_dir_on_storage_server(storage, path):
+    host,port = storage
+    con=rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
+    storage = con.root
+    storage.make_dir(path)
+
+def make_dir(naming_server, path):
+    # naming_server.make_dir(path)
+    storage_servers = naming_server.get_storage_servers()
+    for i in range(len(storage_servers)):
+        m = storage_servers['{}'.format(i+1)]
+        make_dir_on_storage_server(m, path)
+
+def delete_dir_on_storage_server(storage, path):
+    host,port = storage
+    con=rpyc.connect(host, port=port, config={"allow_public_attrs" : True})
+    storage = con.root
+    storage.delete_dir(path)
+
+def delete_dir(naming_server, path):
+    # naming_server.delete_dir(path)
+    storage_servers = naming_server.get_storage_servers()
+    for i in range(len(storage_servers)):
+        m = storage_servers['{}'.format(i+1)]
+        delete_dir_on_storage_server(m, path)
 
 def main(args):
     con=rpyc.connect("127.0.0.1",port=2000, config = {"allow_public_attrs" : True})
