@@ -21,7 +21,12 @@ def read_from_storage(block_uuid,storage):
 	storage = con.root
 	return storage.read_file(block_uuid)
 
-
+def initialize_storage_server(storage_server):
+    host,port = storage_server
+    con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
+    storage_server = con.root
+    return storage_server.initialize_storage()
+    
 def initialize(naming_server):
     storage_servers = naming_server.get_storage_servers()
     for i in range(len(storage_servers)):
@@ -77,36 +82,14 @@ def delete_file(name_server, path):
 			m.delete_file(block[0])
 	return
 
+# TODO check the implementation in the 
 def info_file(name_server, path):
-	file_table = name_server.get_file_table_entry(path)
-	if not file_table:
-		LOG.info("404: file not found")
-		return
-	# block[1] - server on which it is stored
-    # block[0] - id of the block
-	for block in file_table:
-		for m in [name_server.get_minions()[_] for _ in block[1]]:
-			host,port = m
-			con=con.root(host,port=port, config = {"allow_public_attrs" : True})
-			storage = con.root
-			return storage.file_info(block[0])
-
-
+	name_server.info_file(path)
+	return
+	
 def copy_file(name_server, src, dest):
-	file_table_src = name_server.get_file_table_entry(src)
-	if not file_table:
-		LOG.info("404: file not found")
-		return
-	file_table_dest = name_server.get_file_table_entry(dest)
-	# block[1] - server on which it is stored
-    # block[0] - id of the block
-	for block in file_table:
-		for m in [name_server.get_minions()[_] for _ in block[1]]:
-			host,port = m
-			con=con.root(host,port=port, config = {"allow_public_attrs" : True})
-			storage = con.root
-			return storage.copy_file(block[0], dest)
-
+	file = read_file(name_server, src)
+	write_file(name_server, dest, file)
 	return 
 
 def move_file(name_server, src, dest):
@@ -115,8 +98,13 @@ def move_file(name_server, src, dest):
 	return 0
 
 def open_dir(name_server, path):
-	
-	return 
+	# change directory on all storage server
+	storage_servers = name_server.get_minions()
+	for storage in storage_servers:
+		host,port = storage[1]
+		con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+		storage = con.root
+		return storage.open_dir(path) 
 
 
 def read_dir(name_server, path):
@@ -130,11 +118,15 @@ def make_dir(name_server, path):
 	return 0
 
 def delete_dir(path):
-	directory = path
-	return 0
+	storage_servers = name_server.get_minions()
+	for storage in storage_servers:
+		host,port = storage[1]
+		con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+		storage = con.root
+		return storage.delete_dir(path) 
 
 def main(args):
-    con=rpyc.connect("127.0.0.1",port=2000, config = {"allow_public_attrs" : True})
+    con=rpyc.connect("127.0.0.1", port=2000, config = {"allow_public_attrs" : True})
     naming_server=con.root
 
     menu = sys.argv[1]
