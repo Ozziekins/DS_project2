@@ -77,14 +77,35 @@ def delete_file(name_server, path):
 			m.delete_file(block[0])
 	return
 
-def info_file(path):
-	host,port = storage
-	con=con.root(host,port=port, config = {"allow_public_attrs" : True})
-	storage = con.root
-	return storage.file_info(block_uuid)
+def info_file(name_server, path):
+	file_table = name_server.get_file_table_entry(path)
+	if not file_table:
+		LOG.info("404: file not found")
+		return
+	# block[1] - server on which it is stored
+    # block[0] - id of the block
+	for block in file_table:
+		for m in [name_server.get_minions()[_] for _ in block[1]]:
+			host,port = m
+			con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+			storage = con.root
+			return storage.file_info(block[0])
 
 
 def copy_file(name_server, src, dest):
+	file_table_src = name_server.get_file_table_entry(src)
+	if not file_table:
+		LOG.info("404: file not found")
+		return
+	file_table_dest = name_server.get_file_table_entry(dest)
+	# block[1] - server on which it is stored
+    # block[0] - id of the block
+	for block in file_table:
+		for m in [name_server.get_minions()[_] for _ in block[1]]:
+			host,port = m
+			con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+			storage = con.root
+			return storage.copy_file(block[0], dest)
 
 	return 
 
@@ -94,7 +115,7 @@ def move_file(name_server, src, dest):
 	return 0
 
 def open_dir(name_server, path):
-
+	
 	return 
 
 
