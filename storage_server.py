@@ -123,8 +123,6 @@ class StorageService(rpyc.Service):
 		    print ("Successfully deleted the directory %s " % DATA_DIR + path)
 
 	def replicate_write(self, block_id, data, storage_servers):
-		print("2 here")
-		print(storage_servers)
 		storage_server = storage_servers[0]
 		storage_servers = storage_servers[1:]
 

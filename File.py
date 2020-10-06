@@ -1,4 +1,3 @@
-from uuid import uuid4
 from datetime import date
 
 
@@ -28,10 +27,10 @@ class File:
         self.size = size
 
     def get_info(self):
-        info = (f'name: {self.name}\n '\
+        info = (f'name: {self.name}\n'\
                 f'location: {self.location}\n'\
                 f'size: {self.size} bytes\n'\
-                f'date created: {self.date_created}\n '\
+                f'date created: {self.date_created}\n'\
                 f'last modified: {self.last_modified}')
         return info
 
