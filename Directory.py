@@ -55,6 +55,10 @@ class Directory:
             todel = self.files[file_name]
             todel.delete()
             del self.files[file_name]
+
+    def delete_directory(self):
+        del self.files
+        del self.directories
     
     def exist_file(self, file_name):
         if self.files.get(file_name) != None:

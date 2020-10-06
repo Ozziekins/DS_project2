@@ -33,13 +33,15 @@ class MasterService(rpyc.Service):
         file = self.__class__.file_tree.get_file(fname)
         return file.get_info()
 
-
     def exposed_make_dir(self,dir_name):
         self.__class__.file_tree.create_directory(dir_name)
     
     def exposed_open_dir(self, path):
         current_dir = self.__class__.file_tree.open_directory(path)
         return current_dir
+
+    def exposed_delete_dir(self, path):
+        self.__class__.file_tree.delete_directory()
 
     def list_dir(self, path):
       ls = list()
@@ -68,8 +70,13 @@ class MasterService(rpyc.Service):
     def calc_num_blocks(self,size):
       return int(math.ceil(float(size)/self.__class__.block_size))
 
-    def exists(self,file):
+    def file_exists(self,file):
         if file in self.__class__.file_tree.get_files().keys():
+            return True
+        return False
+
+    def dir_exists(self,path):
+      if path in self.__class__.file_tree.get_directories().keys():
             return True
         return False
 

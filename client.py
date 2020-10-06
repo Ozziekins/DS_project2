@@ -12,15 +12,15 @@ def initialize_storage_server(storage_server):
     storage_server = con.root
     return storage_server.initialize_storage()
  
- # delete from name sever 
 def initialize(naming_server):
     storage_servers = naming_server.get_storage_servers()
     for i in range(len(storage_servers)):
         m = storage_servers['{}'.format(i+1)]
         initialize_storage_server(m)
+    # naming_server.init()
 
-def create_file(naming_server, path):
-    naming_server.create_file(path)
+def create_file(naming_server, file_name):
+    naming_server.create_file(file_name)
     return 0
 
 def read_from_storage(block_uuid,storage):
@@ -30,8 +30,8 @@ def read_from_storage(block_uuid,storage):
     storage = con.root
     return storage.read_file(block_uuid)
 
-def read_file(naming_server, path):
-    file_table = naming_server.read(path)
+def read_file(naming_server, file_name):
+    file_table = naming_server.read(file_name)
     if not file_table:
         LOG.info("404: file not found")
         return
@@ -46,7 +46,7 @@ def read_file(naming_server, path):
             else:
                 LOG.info("No blocks found. Possibly a corrupt file")
 
-def write_to_storage(block_uuid,data,storage_servers):
+def write_to_storage(block_uuid, data, storage_servers):
     LOG.info("sending: " + str(block_uuid) + str(storage_servers))
     storage=storage_servers[0]
     storage_servers=storage_servers[1:]
@@ -88,25 +88,69 @@ def delete_file(naming_server, fname):
     for block in file_table:
         storage_servers = [naming_server.get_storage_servers()[_] for _ in block[1]]
         delete_from_storage_server(block[0], storage_servers)
-
-# TODO check the implementation in the 
-def info_file(naming_server, path):
-    info = naming_server.get_info(path)
+ 
+def info_file(naming_server, file_name):
+    info = naming_server.get_info(file_name)
     sys.stdout.write(info)
     return
     
-def copy_file(naming_server, src, dest):
-    file = read_file(naming_server, src)
-    write_file(naming_server, dest, file)
+def copy_file(naming_server, file_name):
+    # check if file exists, if no give error message
+    if not naming_server.file_exists(file_name):
+        LOG.info("404: file not found")
+        return
+
+    base, ext = file_name.split(".")
+    info = info_file(naming_server, file_name)
+
+    words = info.split("\n")
+
+    final = list()
+
+    for w in words:
+        final.extend(w.split(" "))
+
+    for i in range(len(final)):
+        if final[i] == 'location:':
+            path = final[i+1]
+
+    contents = dir_content(naming_server, path)
+
+    copies = base + "_copy"
+    num = []
+
+    # check if any copies already exist
+    for c in contents:
+        # get all numbers of the copies
+        if copies in c:
+            i = int(''.join(x for x in c if x.isdigit()))
+            num.append(i)
+
+    
+    # and there is no copy, create the first copy
+    if len(num) == 0:
+        base_copy = base + f'_copy{1}'
+        copy_name = base_copy + ext
+    else:
+        # if there is a copy get the latest copy and increase the number by one
+        j = max(num) + 1
+        base_copy = copies + f'{j}'
+        copy_name = base_copy + ext
+
+    create_file(naming_server, copy_name)
+    write_file(naming_server, file_name, copy_name)
     return 
 
-def move_file(naming_server, src, dest):
-    copy_file(naming_server, src, dest)
-    delete_file(naming_server, src)
+def move_file(naming_server, file_name, path):
+    # check if path exists, if no give error message
+    if not naming_server.dir_exists(path):
+        make_dir(naming_server, path)
+
+    # still in process
     return 0
 
 def open_dir(naming_server, path):
-    naming_server.make_dir(path)
+    naming_server.open_dir(path)
     storage_servers = naming_server.get_storage_servers()
     store = [*storage_servers.keys()]
 
@@ -122,7 +166,11 @@ def read_dir(naming_server, path):
     content = naming_server.list_dir(path)
     for c in content:
         print(c)
-    return
+    return content
+
+def dir_content(naming_server, path):
+    content = naming_server.list_dir(path)
+    return content
 
 def make_dir(naming_server, path):
     naming_server.make_dir(path)
@@ -136,13 +184,21 @@ def make_dir(naming_server, path):
         storage = con.root
         storage.make_dir(path)
 
-def delete_dir(path):
-    storage_servers = naming_server.get_storage_servers()
-    for storage in storage_servers:
-        host,port = storage[1]
-        con=con.root(host,port=port, config = {"allow_public_attrs" : True})
-        storage = con.root
-        return storage.delete_dir(path) 
+def delete_dir(naming_server, path):
+    print("Are you sure? \n")
+    reply = input("y/n: ")
+    if reply == 'y':
+        storage_servers = naming_server.get_storage_servers()
+        store = [*storage_servers.keys()]
+
+        for i in store:
+            storage = storage_servers[i]
+            host,port = storage
+            con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
+            storage = con.root
+            storage.delete_dir(path)
+
+        naming_server.delete_dir(path)
 
 def main(args):
     con=rpyc.connect("127.0.0.1", port=2000, config = {"allow_public_attrs" : True})
