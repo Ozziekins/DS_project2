@@ -32,14 +32,16 @@ def initialize_storage_server(storage_server):
  
  # delete from name sever 
 def initialize(naming_server):
-    storage_servers = naming_server.get_storage_servers()
-    for i in range(len(storage_servers)):
-        m = storage_servers['{}'.format(i+1)]
-        initialize_storage_server(m)
+	available_size = naming_server.initialize()
+	storage_servers = naming_server.get_storage_servers()
+	for i in range(len(storage_servers)):
+		m = storage_servers['{}'.format(i+1)]
+		initialize_storage_server(m)
+	sys.stdout.write(f'{available_size} bytes available\n')
 
 # TODO check the argument
 def create_file(name_server, path):
-	name_server.create_file(path)
+	name_server.create_file(path, 0)
 	return 0
 
 
@@ -47,7 +49,7 @@ def read_file(name_server, path):
 	#TODO check the name of name_server
 	file_table = name_server.read(path)
 	if not file_table:
-		LOG.info("404: file not found")
+		LOG.info("File is empty or doesn't exist")
 		return
 	# block[1] - server on which it is stored
     # block[0] - id of the block
@@ -63,7 +65,6 @@ def read_file(name_server, path):
 # handle if it is exists
 def write_file(name_server, src, dest):
 	size = os.path.getsize(src)
-	print(size)
 	blocks = name_server.write(dest, size)
 	with open(src) as f:
 		for b in blocks:
@@ -81,17 +82,17 @@ def delete_from_storage_server(block_uuid, storage_server):
     storage_server.delete_file(block_uuid, storage_server)
 
 def delete_file(naming_server, fname):
-    file_table = naming_server.read(fname)
-    
-    storage_servers = naming_server.get_storage_servers()
-    if not file_table:
-        LOG.info("404: file not found")
-        return
+	file_table = naming_server.read(fname)
 
-    for block in file_table:
-        for _ in [naming_server.get_storage_servers()[_] for _ in block[1]]:
-        	print(storage_servers.get(block[1]))
-        	delete_from_storage_server(block[0], storage_servers)
+	storage_servers = naming_server.get_storage_servers()
+	if not file_table:
+		LOG.info("404: File is empty")
+		return
+
+	for block in file_table:
+		print([storage_servers[_] for _ in block[1]])
+		for _ in [storage_servers[_] for _ in block[1]]:
+			delete_from_storage_server(block[0], storage_servers)
 
 
 # def delete_file(name_server, path):
@@ -155,6 +156,11 @@ def delete_dir(name_server, path):
 		storage = con.root
 		return storage.delete_dir(path) 
 
+def list_entries(name_server, path):
+	entries = name_server.list_dir(path)
+	print('\n'.join(entries))
+
+
 def main(args):
 	con=rpyc.connect("127.0.0.1", port=2000, config = {"allow_public_attrs" : True})
 	naming_server=con.root
@@ -186,6 +192,8 @@ def main(args):
 		make_dir(naming_server, sys.argv[2])
 	elif menu == 'dltdir':
 		delete_dir(naming_server, sys.argv[2])
+	elif menu == 'listall':
+		list_entries(naming_server, sys.argv[2])
 	else:
 		print("Possible commands")
 		print("-------------------------")

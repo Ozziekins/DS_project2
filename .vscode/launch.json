@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/client.py",
             "console": "integratedTerminal",
-            "args" : ["write", "nastya.txt", "text.txt"]
+            "args" : ["delete", "text.c"]
         }
     ]
 }
