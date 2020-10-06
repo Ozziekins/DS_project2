@@ -1,4 +1,3 @@
-from uuid import uuid4
 from datetime import date
 from File import File
 
@@ -23,8 +22,8 @@ class Directory:
                 else:
                     if len(x.get_directories) != 0:
                         x.open_directory(path)
-                    return None
-            
+        self.create_directory(path)
+        self.open_directory(path)
 
     def create_file(self, file_name):
         self.files[file_name] = File(file_name, '')
@@ -52,12 +51,25 @@ class Directory:
 
     def delete_file(self, file_name):
         if self.exist_file(file_name):
-            todel = self.files[file_name]
-            todel.delete()
             del self.files[file_name]
+
+    def delete_files(self):
+        del self.files
+    
+    def delete_directory(self, dir_name):
+        if self.exist_directory(dir_name):
+            del self.directories[dir_name]
+
+    def delete_directories(self):
+        del self.directories
     
     def exist_file(self, file_name):
         if self.files.get(file_name) != None:
+            return True
+        return False
+
+    def exist_directory(self, dir_name):
+        if self.directories.get(dir_name) != None:
             return True
         return False
 
@@ -65,9 +77,15 @@ class Directory:
         self.files[new_name] = self.files[original_name]
         self.delete_file(original_name)
 
-    def isEmpty(self):
+    def is_empty(self):
         if self.files and self.directories:
             return False
         return True
+    
+    def init(self):
+        self.delete_directories()
+        self.delete_files()
+        self.size = 0
+        self.last_modified = date.today()
 
 # update size, last_modified on delete and update operations

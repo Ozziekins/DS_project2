@@ -22,6 +22,9 @@ class MasterService(rpyc.Service):
     block_size = BLOCK_SIZE
     replication_factor = REPLICATION_FACTOR
 
+    def exposed_initialize(self):
+        self.__class__.file_tree.init()
+
     def exposed_read(self,fname):
         file = self.__class__.file_tree.get_file(fname)
         return file.get_mapping()
@@ -31,7 +34,7 @@ class MasterService(rpyc.Service):
 
     def exposed_get_info(self, fname):
         file = self.__class__.file_tree.get_file(fname)
-        print(file.get_info())
+        return file.get_info()
 
     def exposed_make_dir(self,dir_name):
         self.__class__.file_tree.create_directory(dir_name)
@@ -40,10 +43,19 @@ class MasterService(rpyc.Service):
         current_dir = self.__class__.file_tree.open_directory(path)
         return current_dir
 
+    def exposed_list_dir(self, path):
+      ls = list()
+      dirs = self.__class__.file_tree.get_directories().keys()
+      files = self.__class__.file_tree.get_files().keys()
+      ls.extend([*dirs])
+      ls.extend([*files])
+      print(ls)
+      return ls
+
+    def exposed_delete_dir(self, dir_name):
+        self.__class__.file_tree.delete_directory(dir_name)
+
     def exposed_write(self,dest,size):
-        if self.exists(dest):
-            print(f'File {dest} already exist')
-            return None
         self.__class__.file_tree.create_file(dest)
         num_blocks = self.calc_num_blocks(size)
         blocks = self.alloc_blocks(dest,num_blocks)
@@ -77,7 +89,7 @@ class MasterService(rpyc.Service):
             file.add_mapping((block_id,nodes_ids))
         return blocks
 
-
+# initialize the entire system 
 if __name__ == "__main__":
   t = ThreadedServer(MasterService, port = 2000, protocol_config = {"allow_public_attrs" : True})
   t.start()

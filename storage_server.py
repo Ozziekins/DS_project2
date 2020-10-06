@@ -134,8 +134,10 @@ class StorageService(rpyc.Service):
 		storage_server = conn.root
 		storage_server.write_file(block_id, data, storage_servers)
 
-	def replicate_delete(block_id, storage_servers):
+	def replicate_delete(self, block_id, storage_servers):
+		print("from storage")
 		storage_server = storage_servers[0]
+		print(storage_server)
 		storage_servers = storage_servers[1:]
 
 		host, port = storage_server
