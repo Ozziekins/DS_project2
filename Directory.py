@@ -55,7 +55,7 @@ class Directory:
             del self.files[file_name]
 
     def delete_files(self):
-        file_names = self.get_files().keys()
+        file_names = list(self.get_files().keys())
         for file in file_names:
             self.delete_file(file)
     
@@ -64,8 +64,9 @@ class Directory:
             del self.directories[dir_name]
 
     def delete_directories(self):
-        for dir in self.directories:
-            self.delete_directory(dir.get_name)
+        dir_names = list(self.get_directories().keys())
+        for dir in dir_names:
+            self.delete_directory(dir)
     
     def get_name(self):
         return self.name
