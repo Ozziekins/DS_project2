@@ -72,19 +72,19 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 ## Prerequisites  
 
-- EC2 instance running
+- About 5 EC2 instance running and a lot of money to support them 😭
 
 - DockerHub account
 
-
+  
 
 ## How to Launch  
 
-<u>Step 1</u>: Launch an amazon instances  
+<u>Step 1</u>: Launch the amazon instances  
 
 <u>Step 2</u>: ssh into the instances using the command in  the connect tab  
 
-<u>Step 3</u>: Pull our docker image  
+<u>Step 3</u>: Pull our docker images on the various instances  
 
 <u>Step 4</u>: ```docker-compose up```  
 
