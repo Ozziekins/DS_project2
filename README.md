@@ -84,9 +84,11 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 <u>Step 2</u>: ssh into the instances using the command in  the connect tab  
 
-<u>Step 3</u>: Pull our docker images on the various instances  
+<u>Step 3</u>: Pull our docker images on the various instances using the command in step 4  
 
-<u>Step 4</u>: ```docker-compose up```  
+<u>Step 4</u>: ```docker pull <image_name>```  
+
+<u>Step 5</u>: Make use of any of the commands listed below
 
 
 
