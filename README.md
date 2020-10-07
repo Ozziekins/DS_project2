@@ -1,8 +1,8 @@
-**# DS Project2 - Python Implementation of Distributed File System**  
+# DS Project2 - Python Implementation of Distributed File System  
 
 
 
-**## Project Description**  
+## Project Description  
 
 Implementing a simple Distributed File System (DFS) using python as our programming language.  
 
@@ -10,91 +10,75 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 
 
-**## Basic functions supported by our DFS**  
+## Basic functions supported by our DFS  
 
-***\*Client side\****  
+**Client side**  
 
-\- Initialize:
+- Initialize:
+  - Initialize the client storage on a new system, should remove any existing file in the dfs root directory and return available size.
 
-​    \- Initialize the client storage on a new system, should remove any existing file in the dfs root directory and return available size.
+- File create:
+  - Should allow to create a new empty file.
 
-\- File create:
+- File read:
+  - Should allow to read any file from DFS (download a file from the DFS to the Client side).
+- File write:
+  - Should allow to put any file to DFS (upload a file from the Client side to the DFS)
 
-​    \- Should allow to create a new empty file.
+- File delete:
+  - Should allow to delete any file from DFS
 
-\- File read:
+- File info:
+  -  Should provide information about the file (any useful information - size, node id, etc.)
 
-​    \- Should allow to read any file from DFS (download a file from the DFS to the Client side).
+- File copy:
+  - Should allow to create a copy of file.
 
-\- File write:
+- File move:
+  - Should allow to move a file to the specified path.
 
-​    \- Should allow to put any file to DFS (upload a file from the Client side to the DFS)
+- Open directory:
+  - Should allow to change directory
 
-\- File delete:
+- Read directory:
+  - Should return list of files, which are stored in the directory.
 
-​    \- Should allow to delete any file from DFS
+- Make directory:
+  - Should allow to create a new directory.
 
-\- File info:
-
-​    \- Should provide information about the file (any useful information - size, node id, etc.)
-
-\- File copy:
-
-​    \- Should allow to create a copy of file.
-
-\- File move:
-
-​    \- Should allow to move a file to the specified path.
-
-\- Open directory
-
-​    \- Should allow to change directory
-
-\- Read directory:
-
-​    \- Should return list of files, which are stored in the directory.
-
-\- Make directory:
-
-​    \- Should allow to create a new directory.
-
-\- Delete directory:
-
-​    \- Should allow to delete directory.  If the directory contains files the system should ask for confirmation from the user before deletion.  
+- Delete directory:
+  - Should allow to delete directory.  If the directory contains files the system should ask for confirmation from the user before deletion.  
 
 
 
-***\*Storage Server\****
+**Storage Server**
 
-\- Replication:
+- Replication:
+  - Files will be replicated on multiple storage servers.
 
-​    \- Files will be replicated on multiple storage servers.
+- Directory management:
+  - Access files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\var\storage{n}``` and ```n``` is the storage server number
 
-\- Directory management:
-
-​    \- Acces files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\var\storage{n}``` and ```n``` is the storage server number
-
-\- Handle client requests  
+- Handle client requests  
 
 
 
-***\*Naming Server\****  
+**Naming Server**  
 
-\- File striping:
-
-​    \- Slicing a file into several chunks or blocks; and our ```BLOCK_SIZE``` is ***\*128\****  
-
-
-
-**## Prerequisites**  
-
-\- EC2 instance running
-
-\- DockerHub account
+- File striping:
+  -  Slicing a file into several chunks or blocks; and our ```BLOCK_SIZE``` is **128**  
 
 
 
-**## How to Launch**  
+## Prerequisites  
+
+- EC2 instance running
+
+- DockerHub account
+
+
+
+## How to Launch  
 
 <u>Step 1</u>: Launch an amazon instances  
 
@@ -106,9 +90,9 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 
 
-**## Commands**
+## Commands
 
-\```
+```
 
 $: init
 
@@ -122,25 +106,26 @@ $: delete <file_name>
 
 $: info <file_name>
 
-$: copy src_file dest_file
+$: copy <file_name>  
+
+$: root
 
 $: move src dest
 
-$: opndir directory
+$: cd  directory
 
-$: rddir directory
+$: ls directory
 
 $: mkdir directory
 
 $: dltdir directory
-
-\```
-
+```
 
 
-**## Architectural Diagrams**  
 
-***\*Overall architecture\****  
+## Architectural Diagrams  
+
+**Overall architecture**  
 
 
 
@@ -148,7 +133,7 @@ $: dltdir directory
 
 
 
-***\*Naming server and file system\****  
+**Naming server and file system**  
 
 
 
@@ -156,7 +141,7 @@ $: dltdir directory
 
 
 
-***\*Storage servers and replication\****  
+**Storage servers and replication**  
 
 
 
@@ -164,13 +149,13 @@ $: dltdir directory
 
 
 
-**## Technology Stacks**  
+## Technology Stacks  
 
 ![alt text](https://github.com/Ozziekins/DS_project2/blob/master/images/stacks.png?raw=true)  
 
 
 
-**## Communication Protocols**  
+## Communication Protocols  
 
 Our system uses an iterative manner of communicating where the client first goes to the naming server to get the required metadata, such as file chunk id and the particular storage server that the chunk can be found on.  
 
@@ -182,13 +167,13 @@ For communication, the various parts of our system make use of ***\*rpyc\****(re
 
 
 
-**## Team and Contributions**  
+## Team and Contributions  
 
-***\*Team name:\****   
+**Team name:**   
 
 DFST  
 
-***\*Members:\****  
+**Members:**  
 
 Ozioma Okonicha (o.okonicha@innopolis.university)👩🏾‍💻🇳🇬  
 
@@ -198,8 +183,8 @@ Daniel Atonge (d.atonge@innopolis.university)🧑🏿‍💻🇨🇲
 
 
 
-***\*Contributions proven by Trello\****  
+**Contributions proven by Trello**  
 
 
 
-***\*Contributions proven by Github\****  
+**Contributions proven by Github**  
