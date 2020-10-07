@@ -13,21 +13,36 @@ from datetime import date
 from rpyc.utils.server import ThreadedServer
 
 BLOCK_SIZE = 128
+# REPLICATION_FACTOR = 1
+# STORAGESERVER = {"1":("127.0.0.1", 5000)}
 REPLICATION_FACTOR = 2
-STORAGESERVER = {"1":("127.0.0.1", 5555), "2":("127.0.0.1",6666)}
+{"1":("3.23.149.225", 5000), "2":("3.23.228.220", 5000), "3":("52.15.190.62", 5000)}
+MAX_SIZE = 512000
 
-class MasterService(rpyc.Service):
-    file_tree = Directory('','')
+class NameService(rpyc.Service):
+    root = Directory('','')
+    file_tree = root
     storage_servers = STORAGESERVER
     block_size = BLOCK_SIZE
     replication_factor = REPLICATION_FACTOR
+    available_size = MAX_SIZE
+
+    def exposed_open_dir(self, path):
+        self.__class__.file_tree = self.__class__.file_tree.open_directory(path)
+        
+    def exposed_open_root(self):
+        self.__class__.file_tree = self.__class__.root
+
+    def exposed_initialize(self):
+        self.__class__.file_tree.init()
+        return self.__class__.available_size
 
     def exposed_read(self,fname):
         file = self.__class__.file_tree.get_file(fname)
         return file.get_mapping()
 
-    def exposed_create_file(self, fname):
-        self.__class__.file_tree.create_file(fname)
+    def exposed_create_file(self, fname, size):
+        self.__class__.file_tree.create_file(fname, size)
 
     def exposed_get_info(self, fname):
         file = self.__class__.file_tree.get_file(fname)
@@ -35,31 +50,32 @@ class MasterService(rpyc.Service):
 
     def exposed_make_dir(self,dir_name):
         self.__class__.file_tree.create_directory(dir_name)
-    
-    def exposed_open_dir(self, path):
-        current_dir = self.__class__.file_tree.open_directory(path)
-        return current_dir
+        
+    def exposed_list_dir(self):
+      directory_items = self.__class__.file_tree.list_dir()
+      return directory_items
 
-    def exposed_delete_dir(self, path):
-        self.__class__.file_tree.delete_directory()
-
-    def list_dir(self, path):
-      ls = list()
-      m = self.__class__.file_tree.get_directories().keys()
-      ls.extend([*m])
-      f = self.__class__.file_tree.get_files().keys()
-      ls.extend([*f])
-      return ls
+    def exposed_delete_dir(self, dir_name):
+        self.__class__.file_tree.delete_directory(dir_name)
 
     def exposed_write(self,dest,size):
-        # if self.exists(dest):
-        #     print(f'File {dest} already exist')
-        #     return
-        self.__class__.file_tree.create_file(dest)
+        self.__class__.available_size = self.__class__.available_size - size
+        self.__class__.file_tree.create_file(dest, size)
         num_blocks = self.calc_num_blocks(size)
         blocks = self.alloc_blocks(dest,num_blocks)
-
         return blocks
+
+    def exposed_delete_file(self, fname):
+        self.__class__.file_tree.delete_file(fname)
+    
+    def exposed_directory_exists(self, dir_name):
+        return self.__class__.file_tree.exist_directory(dir_name)
+
+    def exposed_is_empty(self, path):
+        directory = self.__class__.file_tree.open_directory(path)
+        if directory.is_empty():
+            return True
+        return False
 
     def exposed_get_block_size(self):
       return self.__class__.block_size
@@ -70,13 +86,8 @@ class MasterService(rpyc.Service):
     def calc_num_blocks(self,size):
       return int(math.ceil(float(size)/self.__class__.block_size))
 
-    def file_exists(self,file):
+    def exists(self,file):
         if file in self.__class__.file_tree.get_files().keys():
-            return True
-        return False
-
-    def dir_exists(self,path):
-      if path in self.__class__.file_tree.get_directories().keys():
             return True
         return False
 
@@ -92,10 +103,9 @@ class MasterService(rpyc.Service):
             blocks.append((block_id,nodes_ids))
 
             file.add_mapping((block_id,nodes_ids))
-        print(blocks)
         return blocks
 
-
+# initialize the entire system 
 if __name__ == "__main__":
-  t = ThreadedServer(MasterService, port = 2000, protocol_config = {"allow_public_attrs" : True})
+  t = ThreadedServer(NameService, port = 2000, protocol_config = {"allow_public_attrs" : True})
   t.start()
