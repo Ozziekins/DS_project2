@@ -163,7 +163,7 @@ Then the client takes this information and goes to the required storage server t
 
 
 
-For communication, the various parts of our system make use of ***\*rpyc\****(remote python call) to communicate with each other. Hence, each component has it's specified ip address and port. 
+For communication, the various parts of our system make use of **rpyc** (remote python call) to communicate with each other. Hence, each component has it's specified ip address and port. 
 
 
 
@@ -185,6 +185,8 @@ Daniel Atonge (d.atonge@innopolis.university)🧑🏿‍💻🇨🇲
 
 **Contributions proven by Trello**  
 
-
+![alt text](https://github.com/Ozziekins/DS_project2/blob/master/images/trello.png?raw=true)
 
 **Contributions proven by Github**  
+
+![alt text](https://github.com/Ozziekins/DS_project2/blob/master/images/github.png?raw=true)
