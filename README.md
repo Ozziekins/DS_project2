@@ -18,36 +18,36 @@ The Distributed File System (DFS) is a file system with data stored on a server.
   - Initialize the client storage on a new system, should remove any existing file in the dfs root directory and return available size.
 
 - File create:
-  - Should allow to create a new empty file.
+  - Allows creation of a new empty file.
 
 - File read:
-  - Should allow to read any file from DFS (download a file from the DFS to the Client side).
+  - Allows reading any file from DFS (download a file from the DFS to the Client side).
 - File write:
-  - Should allow to put any file to DFS (upload a file from the Client side to the DFS)
+  - Allows putting any file to DFS (upload a file from the Client side to the DFS)
 
 - File delete:
-  - Should allow to delete any file from DFS
+  - Allows deleting any file from DFS
 
 - File info:
-  -  Should provide information about the file (any useful information - size, node id, etc.)
+  -  Provides information about the file (any useful information - size, node id, etc.)
 
 - File copy:
-  - Should allow to create a copy of file.
+  - Allows creating a copy of file.
 
 - File move:
-  - Should allow to move a file to the specified path.
+  - Allows moving a file to the specified path.
 
 - Open directory:
-  - Should allow to change directory
+  - Allows changing directory
 
 - Read directory:
-  - Should return list of files, which are stored in the directory.
+  - Returns list of files, which are stored in the directory.
 
 - Make directory:
-  - Should allow to create a new directory.
+  - Allows creation of a new directory.
 
 - Delete directory:
-  - Should allow to delete directory.  If the directory contains files the system should ask for confirmation from the user before deletion.  
+  - Allows deletion of a directory.  If the directory contains files the system asks for confirmation from the user before deletion.  
 
 
 
@@ -57,16 +57,16 @@ The Distributed File System (DFS) is a file system with data stored on a server.
   - Files will be replicated on multiple storage servers.
 
 - Directory management:
-  - Access files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\var\storage{n}``` and ```n``` is the storage server number
+  - Accesses files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\var\storage{n}``` and ```n``` is the storage server number
 
-- Handle client requests  
+- Handles client requests  
 
 
 
 **Naming Server**  
 
 - File striping:
-  -  Slicing a file into several chunks or blocks; and our ```BLOCK_SIZE``` is **128**  
+  -  Slices a file into several chunks or blocks; and our ```BLOCK_SIZE``` is **128**  
 
 
 
@@ -88,7 +88,7 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 <u>Step 4</u>: ```docker pull <image_name>```  
 
-<u>Step 5</u>: Make use of any of the commands listed below
+<u>Step 5</u>: Make use of any of the commands listed below on the instance hosting the client  
 
 
 
