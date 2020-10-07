@@ -72,10 +72,20 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 ## Prerequisites  
 
-- About 5 EC2 instance running and a lot of money to support them 😭
+- About 5 EC2 instance running and a lot of money to support them 😭  
 
-- DockerHub account
+- Instance ip's:  
+  - naming_server: 3.23.185.197  
+  - storage_server1: 3.23.149.225  
+  - storage_server2: 3.23.228.220  
+  - storage_server3: 52.15.190.62
 
+- DockerHub account  
+
+- DockerHub images:
+  - ozziekins/client  
+  - ozziekins/naming  
+  - ozziekins/storage  
   
 
 ## How to Launch  
