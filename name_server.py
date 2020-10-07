@@ -70,6 +70,10 @@ class MasterService(rpyc.Service):
     def exposed_get_storage_servers(self):
       return self.__class__.storage_servers
 
+    def exposed_can_delete_directory(self):
+        # if self.__class__.file_tree.get
+        pass
+
     def calc_num_blocks(self,size):
       return int(math.ceil(float(size)/self.__class__.block_size))
 
