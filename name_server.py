@@ -18,11 +18,18 @@ STORAGESERVER = {"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000), "3":("127.0.0.
 MAX_SIZE = 2000
 
 class MasterService(rpyc.Service):
-    file_tree = Directory('','')
+    root = Directory('','')
+    file_tree = root
     storage_servers = STORAGESERVER
     block_size = BLOCK_SIZE
     replication_factor = REPLICATION_FACTOR
     available_size = MAX_SIZE
+
+    def exposed_open_dir(self, path):
+        self.__class__.file_tree = self.__class__.file_tree.open_directory(path)
+        
+    def exposed_open_root(self):
+        self.__class__.file_tree = self.__class__.root
 
     def exposed_initialize(self):
         self.__class__.file_tree.init()

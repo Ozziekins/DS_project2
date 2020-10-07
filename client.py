@@ -122,19 +122,39 @@ def copy_file(name_server, src, dest):
 	return 
 
 def move_file(name_server, src, dest):
-	copy_file(name_server, src, dest)
+	file_table = name_server.read(src)
+	file_data = ""
+	if not file_table:
+		LOG.info("404: file not found")
+		return
+	for block in file_table:
+		for m in [name_server.get_storage_servers()[_] for _ in block[1]]:
+			data = read_from_storage(block[0], m)
+			if data:
+				file_data = file_data + data
+				break
+			else:
+				LOG.info("No blocks found. Possibly a corrupt file")
+	f = open("temp", "w+")
+	f.write(file_data)
+	f.close()
 	delete_file(name_server, src)
+	name_server.open_dir(dest)
+	write_file(name_server, 'temp', src)
+	os.remove("temp") 
 	return 0
 
 def open_dir(name_server, path):
 	# change directory on all storage server
 	name_server.open_dir(path)
 	storage_servers = name_server.get_storage_servers()
-	for storage in storage_servers:
-		host,port = storage[1]
-		con=con.root(host,port=port, config = {"allow_public_attrs" : True})
+	store = [*storage_servers.keys()]
+	for i in store:
+		storage = storage_servers[i]
+		host,port = storage
+		con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
 		storage = con.root
-		return storage.open_dir(path) 
+		storage.open_dir(path) 
 
 
 def read_dir(name_server, path):
@@ -157,7 +177,7 @@ def make_dir(name_server, path):
 	return 0
 
 def delete_dir(name_server, path):
-	print("Are you sure, buddy y/N?")
+	print("Are you sure y/N?")
 	answer = input()
 	if answer == "" or answer == "N" or answer == "n":
 		return

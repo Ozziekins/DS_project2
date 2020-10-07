@@ -15,12 +15,12 @@ class Directory:
         return True
 
     def open_directory(self, path):
-        for x in self.directories:
-            if path.find(x.get_location) >= 0:
-                if path == x.get_location:
+        for x in self.directories.values():
+            if path.find(x.get_location()) >= 0:
+                if path == x.get_location():
                     return x
                 else:
-                    if len(x.get_directories) != 0:
+                    if len(x.get_directories()) != 0:
                         x.open_directory(path)
         self.create_directory(path)
         self.open_directory(path)

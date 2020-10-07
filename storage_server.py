@@ -94,6 +94,8 @@ class StorageService(rpyc.Service):
 			return False
 
 	def exposed_open_dir(self, path):
+		if not os.path.exists(DATA_DIR+path):
+			self.exposed_make_dir(path)
 		os.chdir(DATA_DIR+path)
 
 	def exposed_read_dir(self, path):
