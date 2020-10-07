@@ -20,7 +20,7 @@ def send_to_storage(block_uuid,data,storage_servers):
 def read_from_storage(block_uuid,storage):
 	host,port = storage
 	con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
-	#TODO chech the name
+	#TODO check the name
 	storage = con.root
 	return storage.read_file(block_uuid)
 
@@ -40,7 +40,7 @@ def initialize(name_server):
 
 # TODO check the argument
 def create_file(name_server, path):
-	name_server.create_file(path)
+	name_server.create_file(path, 0)
 	return 0
 
 
@@ -94,14 +94,12 @@ def delete_file(name_server, fname):
         storage_servers = [name_server.get_storage_servers()[_] for _ in block[1]]
         delete_from_storage_server(block[0], storage_servers)
 
-# TODO check the implementation in the 
 def info_file(name_server, path):
 	info = name_server.get_info(path)
 	sys.stdout.write(info)
 	return
 	
 def copy_file(name_server, src, dest):
-	# file = read_file(name_server, src)
 	#TODO check the name of name_server
 	file_table = name_server.read(src)
 	file_data = ""
@@ -140,10 +138,10 @@ def open_dir(name_server, path):
 
 
 def read_dir(name_server, path):
-	
 	files = name_server.list_dir(path)
 	for f in files:
 		sys.stdout.write(f)
+		sys.stdout.write('\n')
 	return 0
 
 def make_dir(name_server, path):

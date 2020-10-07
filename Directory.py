@@ -25,8 +25,9 @@ class Directory:
         self.create_directory(path)
         self.open_directory(path)
 
-    def create_file(self, file_name):
-        self.files[file_name] = File(file_name, '')
+    def create_file(self, file_name, size):
+        self.add_size(size)
+        self.files[file_name] = File(file_name, '', size)
 
     def create_directory(self, directory_name):
         self.directories[directory_name] = Directory(directory_name, self.location + directory_name)
@@ -54,14 +55,24 @@ class Directory:
             del self.files[file_name]
 
     def delete_files(self):
-        del self.files
+        file_names = list(self.get_files().keys())
+        for file in file_names:
+            self.delete_file(file)
     
     def delete_directory(self, dir_name):
         if self.exist_directory(dir_name):
             del self.directories[dir_name]
 
     def delete_directories(self):
-        del self.directories
+        dir_names = list(self.get_directories().keys())
+        for dir in dir_names:
+            self.delete_directory(dir)
+    
+    def get_name(self):
+        return self.name
+
+    def add_size(self, amount):
+        self.size = self.size + amount
     
     def exist_file(self, file_name):
         if self.files.get(file_name) != None:
@@ -81,6 +92,14 @@ class Directory:
         if self.files and self.directories:
             return False
         return True
+    
+    def list_dir(self, path):
+      ls = list()
+      dirs = self.get_directories().keys()
+      files = self.get_files().keys()
+      ls.extend([*dirs])
+      ls.extend([*files])
+      return ls
     
     def init(self):
         self.delete_directories()

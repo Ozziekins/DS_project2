@@ -14,23 +14,26 @@ from rpyc.utils.server import ThreadedServer
 
 BLOCK_SIZE = 128
 REPLICATION_FACTOR = 2
-STORAGESERVER = {"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000)}
+STORAGESERVER = {"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000), "3":("127.0.0.1",7000)}
+MAX_SIZE = 2000
 
 class MasterService(rpyc.Service):
     file_tree = Directory('','')
     storage_servers = STORAGESERVER
     block_size = BLOCK_SIZE
     replication_factor = REPLICATION_FACTOR
+    available_size = MAX_SIZE
 
     def exposed_initialize(self):
         self.__class__.file_tree.init()
+        return self.__class__.available_size
 
     def exposed_read(self,fname):
         file = self.__class__.file_tree.get_file(fname)
         return file.get_mapping()
 
-    def exposed_create_file(self, fname):
-        self.__class__.file_tree.create_file(fname)
+    def exposed_create_file(self, fname, size):
+        self.__class__.file_tree.create_file(fname, size)
 
     def exposed_get_info(self, fname):
         file = self.__class__.file_tree.get_file(fname)
@@ -44,23 +47,23 @@ class MasterService(rpyc.Service):
         return current_dir
 
     def exposed_list_dir(self, path):
-      ls = list()
-      dirs = self.__class__.file_tree.get_directories().keys()
-      files = self.__class__.file_tree.get_files().keys()
-      ls.extend([*dirs])
-      ls.extend([*files])
-      print(ls)
-      return ls
+      directory_items = self.__class__.file_tree.list_dir(path)
+      return directory_items
 
     def exposed_delete_dir(self, dir_name):
         self.__class__.file_tree.delete_directory(dir_name)
 
     def exposed_write(self,dest,size):
-        self.__class__.file_tree.create_file(dest)
+        self.__class__.available_size = self.__class__.available_size - size
+        self.__class__.file_tree.create_file(dest, size)
         num_blocks = self.calc_num_blocks(size)
         blocks = self.alloc_blocks(dest,num_blocks)
         return blocks
 
+    def exposed_delete_file(self, fname):
+
+        self.__class__.file_tree.delete_file(fname)
+        
     def exposed_get_block_size(self):
       return self.__class__.block_size
 
