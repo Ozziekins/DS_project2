@@ -57,7 +57,7 @@ The Distributed File System (DFS) is a file system with data stored on a server.
   - Files will be replicated on multiple storage servers.
 
 - Directory management:
-  - Accesses files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\var\storage{n}``` and ```n``` is the storage server number
+  - Accesses files using ```DATA_DIR + file_name``` where ```DATA_DIR``` is ```\tmp\storage``` and ```n``` is the storage server number
 
 - Handles client requests  
 
