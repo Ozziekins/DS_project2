@@ -17,12 +17,6 @@ LOG = logging.getLogger(__name__)
 
 from rpyc.utils.server import ThreadedServer
 
-'''
-Example:
-To read a file, the client will run
-$~ python3 client.py read project.txt
-'''
-
 class StorageService(rpyc.Service):
 	root_dir = "/tmp/storage/"
 	data_directory = root_dir
@@ -95,22 +89,11 @@ class StorageService(rpyc.Service):
 				ls.append(os.path.join(root, name))
 		return ls
 
-	# done on naming server
 	def exposed_make_dir(self, path):
-		# try:
 		os.mkdir(self.__class__.data_directory + path)
-		# except OSError:
-		#     print ("Creation of the directory ( %s ) failed" % self.__class__.data_directory + path)
-		# else:
-		#     print ("Successfully created the directory ( %s )" % self.__class__.data_directory + path)
 
 	def exposed_delete_dir(self, path):
-		try:
-		    os.rmdir(self.__class__.data_directory + path)
-		except OSError:
-		    print ("Deletion of the directory %s failed" % self.__class__.data_directory + path)
-		else:
-		    print ("Successfully deleted the directory %s " % self.__class__.data_directory + path)
+		shutil.rmtree(self.__class__.data_directory + path)
 
 	def replicate_write(self, block_id, data, storage_servers):
 		storage_server = storage_servers[0]

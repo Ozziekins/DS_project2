@@ -7,7 +7,6 @@ logging.basicConfig(level=logging.DEBUG)
 LOG = logging.getLogger(__name__)
 
 def send_to_storage(block_uuid,data,storage_servers):
-    LOG.info("sending: " + str(block_uuid) + str(storage_servers))
     storage=storage_servers[0]
     storage_servers=storage_servers[1:]
     host,port=storage
@@ -20,7 +19,6 @@ def send_to_storage(block_uuid,data,storage_servers):
 def read_from_storage(block_uuid,storage):
 	host,port = storage
 	con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
-	#TODO check the name
 	storage = con.root
 	return storage.read_file(block_uuid)
 
@@ -30,7 +28,6 @@ def initialize_storage_server(storage_server):
     storage_server = con.root
     return storage_server.initialize_storage()
  
- # delete from name sever 
 def initialize(name_server):
     storage_servers = name_server.get_storage_servers()
     for i in range(len(storage_servers)):
@@ -39,17 +36,14 @@ def initialize(name_server):
     size = name_server.initialize()
     print(f'{size} bytes available\n')
 
-# TODO check the argument
 def create_file(name_server, path):
 	name_server.create_file(path, 0)
 	return 0
 
-
 def read_file(name_server, path):
-	#TODO check the name of name_server
 	file_table = name_server.read(path)
 	if not file_table:
-		LOG.info("404: file not found")
+		print("404: file not found")
 		return
 	# block[1] - server on which it is stored
     # block[0] - id of the block
@@ -60,9 +54,8 @@ def read_file(name_server, path):
 				sys.stdout.write(data)
 				break
 			else:
-				LOG.info("No blocks found. Possibly a corrupt file")
+				print("No blocks found. Possibly a corrupt file")
 
-# handle if it is exists
 def write_file(name_server, src, dest):
 	size = os.path.getsize(src)
 	blocks = name_server.write(dest, size)
@@ -75,7 +68,6 @@ def write_file(name_server, src, dest):
 	return 0
 
 def delete_from_storage_server(block_uuid, storage_servers):
-    LOG.info("deleting: " + str(block_uuid) + str(storage_servers))
     storage=storage_servers[0]
     storage_servers=storage_servers[1:]
     host,port=storage
@@ -88,12 +80,11 @@ def delete_file(name_server, fname):
     file_table = name_server.read(fname)
     name_server.delete_file(fname)
     if not file_table:
-        LOG.info("404: file not found")
+        print("404: file not found")
         return
 
     for block in file_table:
         storage_servers = [name_server.get_storage_servers()[_] for _ in block[1]]
-        LOG.info(storage_servers)
         delete_from_storage_server(block[0], storage_servers)
     
 
@@ -105,7 +96,7 @@ def info_file(name_server, path):
 def copy_file(naming_server, src):
     # check if file exists, if no give error message
     if not naming_server.exists(src):
-        LOG.info("404: file not found")
+        print("404: file not found")
         return
 
     base, ext = src.split(".")
@@ -136,7 +127,7 @@ def copy_file(naming_server, src):
     file_table = naming_server.read(src)
     file_data = ""
     if not file_table:
-        LOG.info("404: file not found")
+        print("404: file not found")
         return
     for block in file_table:
         for m in [naming_server.get_storage_servers()[_] for _ in block[1]]:
@@ -145,7 +136,7 @@ def copy_file(naming_server, src):
                 file_data = file_data + data
                 break
             else:
-                LOG.info("No blocks found. Possibly a corrupt file")
+                print("No blocks found. Possibly a corrupt file")
     f = open("temp", "w+")
     f.write(file_data)
     f.close()
@@ -157,7 +148,7 @@ def move_file(name_server, src, dest):
     file_table = name_server.read(src)
     file_data = ""
     if not file_table:
-        LOG.info("404: file not found")
+        print("404: file not found")
         return
     for block in file_table:
         for m in [name_server.get_storage_servers()[_] for _ in block[1]]:
@@ -166,7 +157,7 @@ def move_file(name_server, src, dest):
                 file_data = file_data + data
                 break
             else:
-                LOG.info("No blocks found. Possibly a corrupt file")
+                print("No blocks found. Possibly a corrupt file")
     f = open("temp", "w+")
     f.write(file_data)
     f.close()
@@ -178,7 +169,6 @@ def move_file(name_server, src, dest):
     return 0
 
 def open_dir(name_server, path):
-	# change directory on all storage server
     if not name_server.directory_exists(path):
         print("Directory does not exist")
         return
@@ -306,7 +296,7 @@ def main(args):
             print("ls directory/")
             print("mkdir directory/")
             print("dltdir directory/")
-            LOG.error("incorrect command")
+            print("incorrect command")
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -13,9 +13,10 @@ from datetime import date
 from rpyc.utils.server import ThreadedServer
 
 BLOCK_SIZE = 128
-REPLICATION_FACTOR = 1
-STORAGESERVER = {"1":("127.0.0.1", 5000)}
-# {"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000), "3":("127.0.0.1",7000)}
+# REPLICATION_FACTOR = 1
+# STORAGESERVER = {"1":("127.0.0.1", 5000)}
+REPLICATION_FACTOR = 2
+{"1":("127.0.0.1", 5000), "2":("127.0.0.1",6000), "3":("127.0.0.1",7000)}
 MAX_SIZE = 512000
 
 class NameService(rpyc.Service):
