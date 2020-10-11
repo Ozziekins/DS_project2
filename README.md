@@ -104,9 +104,9 @@ The Distributed File System (DFS) is a file system with data stored on a server.
 
 <u>Step 7</u>: Go to you client terminal (can be host machine or instance) and run  
 
-<u>Step 8/u>: ```sudo docker run --rm --name <container_name> -it ozziekins/client_test```  
+<u>Step 8</u>: ```sudo docker run --rm --name <container_name> -it ozziekins/client_test```  
 
-<u>Step 8</u>: Make use of any of the commands listed below  
+<u>Step 9</u>: Make use of any of the commands listed below  
 
 
 
