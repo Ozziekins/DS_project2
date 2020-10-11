@@ -1,0 +1,6 @@
+DFS team: Ozioma Okonicha, Daniel Atonge and Anastassiya Ryabkova
+link to github: https://github.com/Ozziekins/DS_project2/tree/ozzie
+link to docker hub: 
+https://hub.docker.com/repository/docker/ozziekins/name_test, 
+https://hub.docker.com/repository/docker/ozziekins/store_test, 
+https://hub.docker.com/repository/docker/ozziekins/client_test
