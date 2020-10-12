@@ -210,4 +210,9 @@ Daniel Atonge (d.atonge@innopolis.university)🧑🏿‍💻🇨🇲
 
 **Contributions proven by Github**  
 
-![alt text](https://github.com/Ozziekins/DS_project2/blob/master/images/github.png?raw=true)
+![alt text](https://github.com/Ozziekins/DS_project2/blob/master/images/github.png?raw=true)  
+
+## Future TO-DO  
+🔖 Include the use of database in order to backup the naming server and rollback after shutting down  
+🔖 Add the functionality for various user authentication  
+🔖 Implement GUI interface  
