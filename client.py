@@ -59,8 +59,8 @@ def read_file(name_server, path):
 			if data:
 				sys.stdout.write(data)
 				break
-			else:
-				print("No blocks found. Possibly a corrupt file")
+			# else:
+				# print("Server is down")
 
 def write_file(name_server, src, dest):
 	size = os.path.getsize(src)
