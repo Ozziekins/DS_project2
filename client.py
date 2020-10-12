@@ -18,7 +18,13 @@ def send_to_storage(block_uuid,data,storage_servers):
 
 def read_from_storage(block_uuid,storage):
 	host,port = storage
-	con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
+	try:
+		con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
+	except ConnectionRefusedError as e:
+		return
+	finally:
+		pass
+	# con=rpyc.connect(host,port=port, config = {"allow_public_attrs" : True})
 	storage = con.root
 	return storage.read_file(block_uuid)
 
